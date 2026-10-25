@@ -1,0 +1,15 @@
+Initial Triples: 9378
+Total Triples after reasoning: 22201
+Added Triples: 12823
+
+Sample Inferred Triples (Superclass & Subproperty inheritance):
+  Lib_catalyst_Q107382139 rdf:type MachineLearningLibrary
+  Lib_catalyst_Q107382139 rdf:type SoftwareLibrary
+  http://www.wikidata.org/entity/Q116908792 rdf:type MachineLearningLibrary
+  Lib_clean_fid_Q120549792 rdf:type MachineLearningLibrary
+  http://www.wikidata.org/entity/Q116908792 rdf:type SoftwareLibrary
+  Lib_captum_Q107382311 rdf:type MachineLearningLibrary
+  http://www.wikidata.org/entity/Q120550360 rdf:type SoftwareLibrary
+  Lib_captum_Q107382311 rdf:type SoftwareLibrary
+  http://www.wikidata.org/entity/Q120550306 rdf:type MachineLearningLibrary
+  Lib_bert_score_Q107382224 rdf:type MachineLearningLibrary

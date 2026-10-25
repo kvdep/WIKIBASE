@@ -1,0 +1,12 @@
+# LibreOffice temporary lock files
+.~lock.*
+*.tmp
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Test files
+test.csv
+test.xlsx
+test_table.html

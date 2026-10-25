@@ -1,0 +1,186 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pte: <http://example.org/pytorch-ecosystem#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix wdt: <http://www.wikidata.org/prop/direct/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/pytorch-ecosystem> a owl:Ontology ;
+    rdfs:label "PyTorch Ecosystem Software Libraries Ontology"@en,
+        "Онтология экосистемы библиотек PyTorch"@ru ;
+    rdfs:comment "Domain ontology describing PyTorch-dependent deep learning libraries, repositories, releases, and licenses."@en,
+        "Онтология для описания библиотек глубокого обучения, зависящих от PyTorch, их репозиториев, версий и лицензий."@ru .
+
+pte:AudioProcessingLibrary a owl:Class ;
+    rdfs:label "Audio Processing Library"@en,
+        "Библиотека обработки звука"@ru ;
+    rdfs:comment "Library for audio signals, speech recognition and synthesis."@en,
+        "Библиотека для спектрального анализа и генерации речи/звука."@ru ;
+    rdfs:subClassOf pte:MachineLearningLibrary .
+
+pte:ComputerVisionLibrary a owl:Class ;
+    rdfs:label "Computer Vision Library"@en,
+        "Библиотека компьютерного зрения"@ru ;
+    rdfs:comment "Library for computer vision tasks and image transformations."@en,
+        "Библиотека для обработки, аугментации и анализа изображений и видео."@ru ;
+    rdfs:subClassOf pte:MachineLearningLibrary .
+
+pte:NaturalLanguageProcessingLibrary a owl:Class ;
+    rdfs:label "NLP Library"@en,
+        "Библиотека обработки естественного языка"@ru ;
+    rdfs:comment "Library for text processing, tokenization and NLP models."@en,
+        "Библиотека для анализа, токенизации и моделирования текстов."@ru ;
+    rdfs:subClassOf pte:MachineLearningLibrary .
+
+pte:OptimizationAndTrainingLibrary a owl:Class ;
+    rdfs:label "Optimization and Training Library"@en,
+        "Библиотека оптимизации и обучения"@ru ;
+    rdfs:comment "Library for training distributed models, custom optimizers and metrics."@en,
+        "Библиотека для масштабирования обучения, оптимизаторов и трекинга метрик."@ru ;
+    rdfs:subClassOf pte:MachineLearningLibrary .
+
+pte:ProbabilisticAndGraphLibrary a owl:Class ;
+    rdfs:label "Probabilistic and Graph ML Library"@en,
+        "Вероятностная и графовая библиотека"@ru ;
+    rdfs:comment "Library for Bayesian inference, GNNs and Gaussian processes."@en,
+        "Библиотека для байесовского вывода, графовых нейросетей и гауссовских процессов."@ru ;
+    rdfs:subClassOf pte:MachineLearningLibrary .
+
+pte:dependsOnSoftware a owl:ObjectProperty ;
+    rdfs:label "depends on software"@en,
+        "зависит от программного обеспечения"@ru ;
+    rdfs:comment "Связывает библиотеку с другой библиотекой или фреймворком, необходимым для ее функционирования."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:SoftwareLibrary ;
+    owl:equivalentProperty wdt:P1547 .
+
+pte:hasPrimaryLicense a owl:FunctionalProperty,
+        owl:ObjectProperty ;
+    rdfs:label "has primary license"@en,
+        "имеет основную лицензию"@ru ;
+    rdfs:comment "Функциональное отношение: единственная основная лицензия проекта."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:SoftwareLicense ;
+    rdfs:subPropertyOf pte:hasLicense .
+
+pte:hasSourceCodeRepository a owl:FunctionalProperty,
+        owl:ObjectProperty ;
+    rdfs:label "has source code repository"@en,
+        "имеет репозиторий исходного кода"@ru ;
+    rdfs:comment "Функциональное отношение: основной репозиторий проекта."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:Repository ;
+    rdfs:subPropertyOf pte:hasRepository .
+
+pte:hasVersion a owl:ObjectProperty ;
+    rdfs:label "has version"@en,
+        "имеет версию"@ru ;
+    rdfs:comment "Связывает библиотеку с ее версией (релизом)."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:SoftwareVersion .
+
+pte:libraryName a owl:DatatypeProperty ;
+    rdfs:label "library name"@en,
+        "название библиотеки"@ru ;
+    rdfs:comment "Строковое имя программной библиотеки."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range xsd:string .
+
+pte:licenseName a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "license name"@en,
+        "название лицензии"@ru ;
+    rdfs:comment "Текстовое наименование программной лицензии."@ru ;
+    rdfs:domain pte:SoftwareLicense ;
+    rdfs:range xsd:string .
+
+pte:releaseDate a owl:DatatypeProperty ;
+    rdfs:label "release date"@en,
+        "дата релиза"@ru ;
+    rdfs:comment "Точная дата публикации версии (квалификатор времени)."@ru ;
+    rdfs:domain pte:SoftwareVersion ;
+    rdfs:range xsd:dateTime .
+
+pte:repositoryURL a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "repository URL"@en,
+        "URL репозитория"@ru ;
+    rdfs:comment "Веб-адрес репозитория исходного кода."@ru ;
+    rdfs:domain pte:Repository ;
+    rdfs:range xsd:anyURI .
+
+pte:versionCount a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "version count"@en,
+        "число зарегистрированных версий"@ru ;
+    rdfs:comment "Общее число зафиксированных релизов библиотеки."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range xsd:integer .
+
+pte:versionNumber a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "version number"@en,
+        "номер версии"@ru ;
+    rdfs:comment "Идентификатор версии в формате semver."@ru ;
+    rdfs:domain pte:SoftwareVersion ;
+    rdfs:range xsd:string .
+
+pte:versionType a owl:DatatypeProperty ;
+    rdfs:label "version type"@en,
+        "тип версии"@ru ;
+    rdfs:comment "Статус релиза: stable, alpha, beta."@ru ;
+    rdfs:domain pte:SoftwareVersion ;
+    rdfs:range xsd:string .
+
+pte:hasLicense a owl:ObjectProperty ;
+    rdfs:label "has license"@en,
+        "имеет лицензию"@ru ;
+    rdfs:comment "Указывает лицензию на использование программной библиотеки."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:SoftwareLicense ;
+    owl:equivalentProperty wdt:P275 .
+
+pte:hasRepository a owl:ObjectProperty ;
+    rdfs:label "has repository"@en,
+        "имеет репозиторий"@ru ;
+    rdfs:comment "Связывает библиотеку с ее репозиторием исходного кода."@ru ;
+    rdfs:domain pte:SoftwareLibrary ;
+    rdfs:range pte:Repository ;
+    owl:equivalentProperty wdt:P1324 .
+
+pte:Repository a owl:Class ;
+    rdfs:label "Source Code Repository"@en,
+        "Репозиторий исходного кода"@ru ;
+    rdfs:comment "Storage location for project source code managed by VCS."@en,
+        "Хранилище файлов с исходным кодом проекта под управлением системы контроля версий."@ru ;
+    owl:equivalentClass wd:Q474550 .
+
+pte:SoftwareLicense a owl:Class ;
+    rdfs:label "Software License"@en,
+        "Лицензия на программное обеспечение"@ru ;
+    rdfs:comment "Legal instrument governing software usage and distribution."@en,
+        "Юридический документ, определяющий условия использования программного обеспечения."@ru ;
+    owl:equivalentClass wd:Q207621 .
+
+pte:SoftwareVersion a owl:Class ;
+    rdfs:label "Software Version"@en,
+        "Версия программного обеспечения"@ru ;
+    rdfs:comment "Specific released build or state of a software package."@en,
+        "Конкретное выпущенное состояние программного пакета."@ru ;
+    owl:equivalentClass wd:Q341 .
+
+pte:MachineLearningLibrary a owl:Class ;
+    rdfs:label "Machine Learning Library"@en,
+        "Библиотека машинного обучения"@ru ;
+    rdfs:comment "Software library implementing machine learning methods."@en,
+        "Программная библиотека, реализующая методы машинного и глубокого обучения."@ru ;
+    rdfs:subClassOf pte:SoftwareLibrary ;
+    owl:equivalentClass wd:Q21169670 .
+
+pte:SoftwareLibrary a owl:Class ;
+    rdfs:label "Software Library"@en,
+        "Программная библиотека"@ru ;
+    rdfs:comment "Reusable software component."@en,
+        "Набор скомпилированного или интерпретируемого кода многократного использования."@ru ;
+    owl:equivalentClass wd:Q188860 .
+

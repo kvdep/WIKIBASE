@@ -1,0 +1,35 @@
+Conforms: False
+
+Validation Report
+Conforms: False
+Results (5):
+Constraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:class pte:SoftwareLicense ; sh:message Literal("Лицензия библиотеки должна быть объектом класса SoftwareLicense.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasLicense ]
+	Focus Node: pte:Lib_gfpgan_Q120549808
+	Result Path: pte:hasLicense
+	Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+Constraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:class pte:SoftwareLicense ; sh:message Literal("Лицензия библиотеки должна быть объектом класса SoftwareLicense.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasLicense ]
+	Focus Node: pte:Lib_open_clip_torch_Q120550360
+	Result Path: pte:hasLicense
+	Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+Constraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:class pte:SoftwareLicense ; sh:message Literal("Лицензия библиотеки должна быть объектом класса SoftwareLicense.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasLicense ]
+	Focus Node: pte:Lib_pytorch_wavelets_Q120550396
+	Result Path: pte:hasLicense
+	Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+Constraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:class pte:SoftwareLicense ; sh:message Literal("Лицензия библиотеки должна быть объектом класса SoftwareLicense.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasLicense ]
+	Focus Node: pte:PyTorch
+	Result Path: pte:hasLicense
+	Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+Constraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:maxCount Literal("1", datatype=xsd:integer) ; sh:message Literal("У библиотеки должен быть указан ровно один основной репозиторий исходного кода.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasSourceCodeRepository ]
+	Focus Node: pte:PyTorch
+	Result Path: pte:hasSourceCodeRepository
+	Message: У библиотеки должен быть указан ровно один основной репозиторий исходного кода.

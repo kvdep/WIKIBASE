@@ -1,0 +1,80 @@
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix pte: <http://example.org/pytorch-ecosystem#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape 1: Library constraints
+pte:LibraryShape
+    a sh:NodeShape ;
+    sh:targetClass pte:SoftwareLibrary, pte:MachineLearningLibrary, 
+                   pte:ComputerVisionLibrary, pte:NaturalLanguageProcessingLibrary,
+                   pte:ProbabilisticAndGraphLibrary, pte:OptimizationAndTrainingLibrary ;
+    
+    # 1. Cardinality constraint: must have exactly 1 library name
+    sh:property [
+        sh:path pte:libraryName ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Библиотека должна иметь ровно одно строковое название (libraryName)."@ru ;
+    ] ;
+
+    # 2. Value class constraint: license must be an instance of SoftwareLicense
+    sh:property [
+        sh:path pte:hasLicense ;
+        sh:minCount 1 ;
+        sh:class pte:SoftwareLicense ;
+        sh:message "Лицензия библиотеки должна быть объектом класса SoftwareLicense."@ru ;
+    ] ;
+
+    # 3. Cardinality constraint: must have at least 1 repository
+    sh:property [
+        sh:path pte:hasSourceCodeRepository ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "У библиотеки должен быть указан ровно один основной репозиторий исходного кода."@ru ;
+    ] ;
+
+    # 4. Pattern constraint: version count must be a non-negative integer
+    sh:property [
+        sh:path pte:versionCount ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Число версий должно быть неотрицательным целым числом."@ru ;
+    ] .
+
+# Shape 2: Repository constraints
+pte:RepositoryShape
+    a sh:NodeShape ;
+    sh:targetClass pte:Repository ;
+    
+    # 5. Pattern constraint: GitHub URL pattern
+    sh:property [
+        sh:path pte:repositoryURL ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:anyURI ;
+        sh:pattern "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$" ;
+        sh:message "URL репозитория должен указывать на валидный адрес GitHub репозитория."@ru ;
+    ] .
+
+# Shape 3: SoftwareVersion constraints
+pte:VersionShape
+    a sh:NodeShape ;
+    sh:targetClass pte:SoftwareVersion ;
+    
+    # 6. Datatype constraint on releaseDate
+    sh:property [
+        sh:path pte:releaseDate ;
+        sh:datatype xsd:dateTime ;
+        sh:message "Дата публикации версии должна иметь тип xsd:dateTime."@ru ;
+    ] ;
+
+    # 7. Pattern constraint on semver string
+    sh:property [
+        sh:path pte:versionIdentifier ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Идентификатор версии должен быть строкой."@ru ;
+    ] .
