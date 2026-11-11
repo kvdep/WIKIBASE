@@ -1,9 +1,14 @@
+from copy import deepcopy
+from pathlib import Path
+
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.opc.constants import RELATIONSHIP_TYPE
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.text.paragraph import Paragraph
 import json
 import os
 
@@ -204,181 +209,28 @@ doc.add_paragraph()
 # ==========================================
 add_header("Задание 2. Формулировка 12 вопросов к базе знаний")
 
-doc.add_paragraph(
-    "В соответствии с техническим заданием сформулированы 12 вопросов трех типов: "
-    "6 графовых вопросов (содержащих фильтрацию по числу/дате, агрегацию, сортировку, многошаговый переход и временные квалификаторы), "
-    "4 текстовых вопроса к корпусу README и 2 комбинированных вопроса."
-)
+task2_path = Path(__file__).resolve().parents[1] / "Резы" / "Отчёт_задание_2.docx"
+task2_doc = docx.Document(task2_path)
+heading_levels = {"Heading1": 2, "Heading2": 3}
 
-add_header("Группа А: 6 вопросов к графу знаний", level=2)
+# Skip the standalone title and page settings. Format headings as in the full report.
+for element in task2_doc.element.body[1:-1]:
+    block = deepcopy(element)
+    if block.tag == qn("w:p"):
+        paragraph = Paragraph(block, doc)
+        level = heading_levels.get(paragraph.style.style_id)
+        if level is not None:
+            header = add_header(paragraph.text, level=level)
+            header.paragraph_format.keep_with_next = True
+            continue
+        if paragraph.text.startswith("Тип. "):
+            paragraph.paragraph_format.keep_with_next = True
 
-graph_questions = [
-    ("Вопрос 1 (Фильтр по числу)",
-     "Какие библиотеки экосистемы PyTorch имеют более 20 зарегистрированных версий (релизов)? Вывести названия и число версий.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?cnt WHERE {
-  ?lib a ?cls ;
-       pte:libraryName ?name ;
-       pte:versionCount ?cnt .
-  FILTER(?cnt > 20)
-}
-ORDER BY DESC(?cnt)""",
-     "Список из 23 библиотек, лидерами которого являются pytorch-transformers (237 версий), PyTorch Lightning (208 версий), accelerate (67 версий), torchmetrics (63 версии), open-clip-torch (56 версий), botorch (55 версий), timm (50 версий), allennlp (47 версий), kornia (42 версии)."),
-
-    ("Вопрос 2 (Агрегация)",
-     "Посчитать распределение количества библиотек экосистемы по типам лицензий.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?licName (COUNT(DISTINCT ?lib) AS ?libCount) WHERE {
-  ?lib pte:hasLicense ?lic .
-  ?lic pte:licenseName ?licName .
-}
-GROUP BY ?licName
-ORDER BY DESC(?libCount)""",
-     "Лицензия MIT — 22 библиотеки; Apache License 2.0 — 20 библиотек; модифицированная лицензия BSD (3-clause) — 5 библиотек; 2-пунктная лицензия BSD — 2 библиотеки."),
-
-    ("Вопрос 3 (Сортировка и топ)",
-     "Вывести топ-5 библиотек с наибольшим числом версий в порядке убывания.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?cnt WHERE {
-  ?lib pte:libraryName ?name ;
-       pte:versionCount ?cnt .
-}
-ORDER BY DESC(?cnt)
-LIMIT 5""",
-     "1. pytorch-pretrained-bert (237 версий); 2. pytorch-transformers (237 версий); 3. PyTorch Lightning (208 версий); 4. accelerate (67 версий); 5. torchmetrics (63 версии)."),
-
-    ("Вопрос 4 (Многошаговый переход, >= 2 ребер)",
-     "Найти библиотеки компьютерного зрения, зависящие от PyTorch, распространяемые по лицензии Apache 2.0, и получить ссылки на их GitHub-репозитории.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?repoUrl WHERE {
-  ?lib a pte:ComputerVisionLibrary ;
-       pte:libraryName ?name ;
-       pte:hasLicense ?lic ;
-       pte:hasRepository ?repo .
-  ?lic pte:licenseName ?licName .
-  ?repo pte:repositoryURL ?repoUrl .
-  FILTER(CONTAINS(LCASE(?licName), "apache"))
-}
-ORDER BY ?name""",
-     "1. effdet (https://github.com/rwightman/efficientdet-pytorch); 2. kornia (https://github.com/kornia/kornia); 3. timm (https://github.com/huggingface/pytorch-image-models)."),
-
-    ("Вопрос 5 (Вопрос с квалификатором времени)",
-     "Какие версии библиотек экосистемы были опубликованы в 2023 году? Вывести название библиотеки, номер версии и точную дату выпуска.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT ?name ?vNum ?date WHERE {
-  ?lib pte:libraryName ?name ;
-       pte:hasVersion ?v .
-  ?v pte:versionIdentifier ?vNum ;
-     pte:releaseDate ?date .
-  FILTER(?date >= "2023-01-01T00:00:00Z"^^xsd:dateTime && 
-         ?date < "2024-01-01T00:00:00Z"^^xsd:dateTime)
-}
-ORDER BY ?date""",
-     "pyro-ppl v1.8.4 (2023-01-03); gpytorch v1.9.1 (2023-01-04); open-clip-torch v2.9.2 (2023-01-05); botorch v0.8.1 (2023-01-06); PyTorch Lightning v1.9.0 (2023-01-17) и др."),
-
-    ("Вопрос 6 (Иерархическая классификация)",
-     "Найти все библиотеки обработки естественного языка (NLP) и вывести их репозитории.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?repoUrl WHERE {
-  ?lib a pte:NaturalLanguageProcessingLibrary ;
-       pte:libraryName ?name ;
-       pte:hasRepository ?repo .
-  ?repo pte:repositoryURL ?repoUrl .
-}
-ORDER BY ?name""",
-     "STonKGs, Stanza, allennlp, attacut, bert-score, flair, fschat, peft, pytorch-pretrained-bert, pytorch-transformers, snorkel, torchtext (всего 12 библиотек).")
-]
-
-for title, q_text, sparql_code, ans in graph_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    add_code_block(sparql_code)
-    p_ans = doc.add_paragraph()
-    p_ans.add_run("Эталонный ответ: ").bold = True
-    p_ans.add_run(ans)
-
-add_header("Группа Б: 4 текстовых вопроса к корпусу README", level=2)
-text_questions = [
-    ("Вопрос 7 (Причина создания / мотивация)",
-     "Какова главная мотивация создания библиотеки Kornia и чем ее архитектура принципиально отличается от традиционных библиотек OpenCV и Pillow?",
-     "Kornia создана для предоставления дифференцируемых операций компьютерного зрения, работающих непосредственно с тензорами PyTorch на GPU. Традиционные библиотеки (OpenCV, Pillow) работают на CPU с массивами NumPy и не поддерживают градиентный спуск, разрывая граф обратного распространения ошибки (autograd). Kornia позволяет встраивать трансформации изображений и пространственные преобразования непосредственно в архитектуру нейросети как обучаемые слои.",
-     "\"Kornia is a differentiable computer vision library for PyTorch... It consists of a set of routines and differentiable modules to solve generic computer vision problems. At its core, the package uses PyTorch as its main backend both for efficiency and to take advantage of the reverse-mode auto-differentiation.\"",
-     "https://github.com/kornia/kornia",
-     "В графе знаний зафиксированы только факты зависимости и лицензия, математические принципы дифференцируемости и работа с autograd в онтологии отсутствуют."),
-
-    ("Вопрос 8 (История создания и авторство)",
-     "В какой исследовательской лаборатории зародилась разработка библиотеки вероятностного программирования Pyro и под чьим управлением она находится сегодня?",
-     "Библиотека глубокого вероятностного программирования Pyro была изначально создана исследовательской группой Uber AI Labs. В настоящее время проект передан независимому сообществу разработчиков и поддерживается некоммерческой организацией Linux Foundation под эгидой LF AI & Data.",
-     "\"Pyro is a flexible, scalable deep probabilistic programming library built on PyTorch... Originally developed at Uber AI Labs, Pyro is now maintained by the community and the Linux Foundation.\"",
-     "https://github.com/pyro-ppl/pyro",
-     "В исходных триплетах Wikidata свойство создателя/разработчика (P178) для сущности Pyro не заполнено."),
-
-    ("Вопрос 9 (Архитектурное описание / компоненты)",
-     "Какие механизмы и бэкенды распределенного параллелизма поддерживает библиотека Hugging Face Accelerate?",
-     "Библиотека Accelerate предоставляет унифицированный интерфейс для обучения моделей PyTorch на нескольких GPU, TPU, кластерах с поддержкой Fully Sharded Data Parallel (FSDP), DeepSpeed (все стадии ZeRO), Megatron-LM, а также распределенного параллелизма данных (DDP) и смешанной точности (FP16, BF16, FP8).",
-     "\"Accelerate was created for PyTorch users who like writing the training loop of PyTorch models... it provides an easy API to make your scripts runnable with multi-GPU, TPU, DeepSpeed, and FSDP, while seamlessly handling device placement and mixed precision.\"",
-     "https://github.com/huggingface/accelerate",
-     "Спецификации аппаратных бэкендов и уровней квантования относятся к деталям технической документации и не являются свойствами верхнего уровня Wikidata."),
-
-    ("Вопрос 10 (Функциональные возможности и алгоритмы)",
-     "Какие фундаментальные алгоритмы атрибуции признаков (Feature Attribution) предоставляет библиотека интерпретируемости Captum?",
-     "Captum предоставляет алгоритмы Integrated Gradients, DeepLIFT, SmoothGrad, Guided Grad-CAM, Conductance и Kernel SHAP, позволяющие оценивать вклад входных признаков и скрытых нейронов в итоговое предсказание глубоких моделей.",
-     "\"Captum is a model interpretability and understanding library for PyTorch... It provides state-of-the-art algorithms including Integrated Gradients, DeepLIFT, SmoothGrad, and Conductance to understand feature importance and neuron contributions.\"",
-     "https://github.com/pytorch/captum",
-     "Алгоритмический состав методов интерпретируемости (Explainable AI) не формализован предикатами RDF-графа.")
-]
-
-for title, q_text, ans, quote, src, reason in text_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    p2 = doc.add_paragraph()
-    p2.add_run("Эталонный ответ: ").bold = True
-    p2.add_run(ans)
-    p3 = doc.add_paragraph()
-    p3.add_run("Цитата из источника: ").bold = True
-    p3.add_run(quote)
-    p4 = doc.add_paragraph()
-    p4.add_run("Ссылка на источник: ").bold = True
-    p4.add_run(src)
-    p5 = doc.add_paragraph()
-    p5.add_run("Причина отсутствия ответа в графе: ").bold = True
-    p5.add_run(reason)
-
-add_header("Группа В: 2 комбинированных вопроса (граф + текст)", level=2)
-
-comb_questions = [
-    ("Вопрос 11 (Комбинированный)",
-     "Найти через граф знаний библиотеку компьютерного зрения с наибольшим числом версий, а затем из ее README определить коллекции предобученных архитектур, поддерживаемых библиотекой.",
-     "Графовая часть: SPARQL-запрос обращается к классу pte:ComputerVisionLibrary, сортирует элементы по pte:versionCount и идентифицирует библиотеку timm (PyTorch Image Models, 50 версий).",
-     "Текстовая часть: Из README timm извлекается описание: библиотека предоставляет свыше 1000 моделей, охватывающих семейства ResNet, Vision Transformer (ViT), Swin Transformer, EfficientNet, ConvNeXt и EVA с весами на ImageNet-1k/22k.",
-     "Библиотека timm (лидер по версиям среди CV) предоставляет реализации современных трансформеров ViT/Swin и свёрточных сетей ConvNeXt/ResNet с предварительно обученными весами."),
-
-    ("Вопрос 12 (Комбинированный)",
-     "Найти через граф знаний вероятностную библиотеку, распространяемую по лицензии MIT, а затем по тексту ее документации определить, для какого класса задач графового машинного обучения она оптимизирована.",
-     "Графовая часть: SPARQL-запрос фильтрует библиотеки класса pte:ProbabilisticAndGraphLibrary со связью pte:hasLicense на экземпляр License_MIT, находя библиотеку PyKEEN.",
-     "Текстовая часть: В README PyKEEN указано, что пакет оптимизирован для обучения и сравнительного бенчмаркинга эмбеддингов графов знаний (Knowledge Graph Embeddings, KGE) и содержит реализации моделей TransE, RotatE, ComplEx и ConvE.",
-     "Библиотека PyKEEN (вероятностный и графовый ML, лицензия MIT) оптимизирована для обучения векторных представлений сущностей и связей в графах знаний (Knowledge Graph Embeddings).")
-]
-
-for title, q_text, g_part, t_part, ans in comb_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    p2 = doc.add_paragraph()
-    p2.add_run("1. Часть, извлекаемая из графа: ").bold = True
-    p2.add_run(g_part)
-    p3 = doc.add_paragraph()
-    p3.add_run("2. Часть, извлекаемая из текста: ").bold = True
-    p3.add_run(t_part)
-    p4 = doc.add_paragraph()
-    p4.add_run("Эталонный ответ: ").bold = True
-    p4.add_run(ans)
+    for hyperlink in block.xpath(".//w:hyperlink[@r:id]"):
+        source_link = task2_doc.part.rels[hyperlink.get(qn("r:id"))]
+        link_id = doc.part.relate_to(source_link.target_ref, source_link.reltype, is_external=True)
+        hyperlink.set(qn("r:id"), link_id)
+    doc.element.body.insert_element_before(block, "w:sectPr")
 
 doc.add_paragraph()
 
@@ -397,7 +249,7 @@ ont_reqs = [
     ("Иерархия классов (10 классов)", "Выстроена строгая таксономия: базовый класс SoftwareLibrary -> MachineLearningLibrary -> подклассы ComputerVisionLibrary, NaturalLanguageProcessingLibrary, AudioProcessingLibrary, ProbabilisticAndGraphLibrary, OptimizationAndTrainingLibrary. Также введены вспомогательные классы SoftwareLicense, SoftwareVersion, Repository."),
     ("Object Properties (6 свойств)", "dependsOnSoftware, hasLicense, hasPrimaryLicense, hasRepository, hasSourceCodeRepository, hasVersion. Для всех явно специфицированы rdfs:domain и rdfs:range."),
     ("Datatype Properties (7 свойств)", "libraryName (xsd:string), versionIdentifier (xsd:string), releaseDate (xsd:dateTime), versionType (xsd:string), repositoryURL (xsd:anyURI), licenseName (xsd:string), versionCount (xsd:integer). Для всех указаны domain и range."),
-    ("Функциональные свойства", "Объявлены functional properties: pte:hasPrimaryLicense, pte:hasSourceCodeRepository, pte:repositoryURL, pte:licenseName, pte:versionCount (у объекта может быть ровно одно значение)."),
+    ("Функциональные свойства", "К функциональным относятся pte:hasPrimaryLicense, pte:hasSourceCodeRepository, pte:repositoryURL, pte:licenseName, pte:versionCount и pte:versionIdentifier. Каждое допускает максимум одно значение для одного субъекта."),
     ("Аннотации и метаданные", "У всех классов и свойств заданы rdfs:label на русском и английском языках (@ru, @en), а также развернутые rdfs:comment."),
     ("Связи с Wikidata", "Указаны owl:equivalentClass к сущностям Wikidata (wd:Q188860, wd:Q21169670, wd:Q207621, wd:Q341) и owl:equivalentProperty (wdt:P1547, wdt:P275, wdt:P1324).")
 ]
@@ -408,21 +260,45 @@ for k, v in ont_reqs:
     p.add_run(v)
 
 add_header("Матрица использования классов и свойств в вопросах", level=2)
-mat_tbl = doc.add_table(rows=8, cols=4)
-mat_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 mat_data = [
-    ("Элемент онтологии", "Тип элемента", "Используется в вопросах", "Обоснование необходимости"),
-    ("pte:SoftwareLibrary / MachineLearningLibrary", "Класс", "В1, В2, В3, В5", "Базовый класс всех анализируемых пакетов ML"),
-    ("pte:ComputerVisionLibrary", "Класс", "В4, В11", "Выделение домена компьютерного зрения"),
-    ("pte:NaturalLanguageProcessingLibrary", "Класс", "В6", "Выделение домена обработки текста (NLP)"),
-    ("pte:ProbabilisticAndGraphLibrary", "Класс", "В12", "Выделение вероятностных и графовых моделей"),
-    ("pte:hasLicense / pte:licenseName", "Object / Datatype", "В2, В4, В12", "Учет лицензионной чистоты и совместимости"),
-    ("pte:hasVersion / pte:releaseDate", "Object / Datatype", "В5", "Анализ квалификатора даты выпуска релиза"),
-    ("pte:hasRepository / pte:repositoryURL", "Object / Datatype", "В4, В6, В11, В12", "Связывание с исходным кодом и текстами README")
+    ("Класс, свойство или источник", "Тип элемента", "Вопросы", "Роль в ответе или модели"),
+    ("pte:SoftwareLibrary", "Класс", "В1–В6, В11–В12\n(косвенно)", "Область определения свойств библиотек в графовых запросах."),
+    ("pte:MachineLearningLibrary", "Класс", "—", "Общий суперкласс для специализированных библиотек машинного обучения."),
+    ("pte:ComputerVisionLibrary", "Класс", "В4, В11", "Явный фильтр по классу библиотек компьютерного зрения."),
+    ("pte:NaturalLanguageProcessingLibrary", "Класс", "В6", "Явный фильтр по классу библиотек обработки естественного языка."),
+    ("pte:ProbabilisticAndGraphLibrary", "Класс", "В12", "Явный фильтр по классу вероятностных и графовых библиотек."),
+    ("pte:AudioProcessingLibrary\npte:OptimizationAndTrainingLibrary", "Классы", "—", "Классификация аудиобиблиотек и средств оптимизации и обучения."),
+    ("pte:SoftwareLicense", "Класс", "В2, В4, В11, В12\n(косвенно)", "Класс объектов связи pte:hasLicense."),
+    ("pte:SoftwareVersion", "Класс", "В5\n(косвенно)", "Класс узлов релизов, к которым ведёт pte:hasVersion."),
+    ("pte:Repository", "Класс", "В4, В6\n(косвенно)", "Класс промежуточных узлов на пути от библиотеки к URL."),
+    ("pte:libraryName", "Datatype", "В1, В3–В6, В11, В12", "Имя библиотеки в результате запроса."),
+    ("pte:versionCount", "Datatype", "В1, В3, В11, В12", "Фильтр по числу версий в В1 и В12. Сортировка в В3 и В11."),
+    ("pte:hasLicense", "Object", "В2, В4, В11, В12", "Связь для подсчёта по лицензиям в В2 и отбора по конкретной лицензии в В4, В11 и В12."),
+    ("pte:licenseName", "Datatype", "В2", "Группировка по названию лицензии."),
+    ("pte:dependsOnSoftware", "Object", "В4", "Проверка зависимости библиотеки от PyTorch."),
+    ("pte:hasRepository\npte:repositoryURL", "Object / Datatype", "В4, В6", "Путь из двух рёбер от библиотеки к URL репозитория."),
+    ("pte:hasVersion\npte:releaseDate", "Object / Datatype", "В5", "Переход к релизу, фильтр за 2023 год и сортировка по дате публикации."),
+    ("pte:versionIdentifier", "Datatype", "В5", "Строковый идентификатор релиза. В5 возвращает его и использует для сортировки при равных дате и названии."),
+    ("owl:sameAs", "Свойство OWL", "В11, В12", "QID выбранной графом библиотеки связывает результат с записью корпуса и README."),
+    ("pte:hasPrimaryLicense", "Object", "—", "Функциональное подсвойство для единственной основной лицензии проекта."),
+    ("pte:hasSourceCodeRepository", "Object", "—", "Функциональное подсвойство для единственного основного репозитория проекта."),
+    ("pte:versionType", "Datatype", "—", "Статус релиза, например stable. Свойство позволяет отбирать версии по статусу независимо от даты."),
+    ("README / data/corpus.jsonl", "Текстовый источник", "В7–В12", "В7–В10 используют текст по заранее заданному QID. В11–В12 читают текст после выбора библиотеки графом."),
 ]
-for r_i, row in enumerate(mat_data):
-    for c_i, val in enumerate(row):
-        c = mat_tbl.cell(r_i, c_i)
+mat_tbl = doc.add_table(rows=len(mat_data), cols=4)
+mat_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+mat_tbl.autofit = False
+mat_widths = (Inches(2.55), Inches(1.05), Inches(1.10), Inches(2.20))
+for column, width in zip(mat_tbl.columns, mat_widths):
+    column.width = width
+for r_i, values in enumerate(mat_data):
+    row = mat_tbl.rows[r_i]
+    row_props = row._tr.get_or_add_trPr()
+    row_props.append(OxmlElement('w:cantSplit'))
+    if r_i == 0:
+        row_props.append(OxmlElement('w:tblHeader'))
+    for c_i, (c, val, width) in enumerate(zip(row.cells, values, mat_widths)):
+        c.width = width
         set_cell_margins(c, top=60, bottom=60, left=80, right=80)
         p = c.paragraphs[0]
         p.paragraph_format.space_after = Pt(0)
@@ -515,10 +391,12 @@ doc.add_paragraph(
     "В результате работы машины логического вывода граф замкнут относительно аксиом RDFS и правил OWL 2 RL:"
 )
 
+owl_summary = Path("data/owlrl_reasoning_summary.txt").read_text(encoding="utf-8").splitlines()
+initial, total, added = (int(line.split(": ", 1)[1]) for line in owl_summary[:3])
 owl_stats = [
-    ("Исходное число триплетов (онтология + данные)", "9 378"),
-    ("Число триплетов после логического вывода", "22 201"),
-    ("Добавлено выведенных триплетов (Inferred Triples)", "+12 823")
+    ("Исходное число триплетов (онтология + данные)", f"{initial:,}".replace(",", " ")),
+    ("Число триплетов после логического вывода", f"{total:,}".replace(",", " ")),
+    ("Добавлено выведенных триплетов (Inferred Triples)", f"+{added:,}".replace(",", " ")),
 ]
 tbl_owl = doc.add_table(rows=4, cols=2)
 tbl_owl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -544,44 +422,63 @@ doc.add_paragraph(
     "Примеры добавленных фактов в ходе дедуктивного вывода:\n"
     "1. Транзитивность подклассов: для индивида pte:Lib_kornia_Q107382312, явно объявленного экземпляром ComputerVisionLibrary, "
     "выведены типы MachineLearningLibrary и SoftwareLibrary.\n"
-    "2. Наследование подсвойств: свойство pte:hasSourceCodeRepository вывело тройки по суперсвойству pte:hasRepository.\n"
-    "3. Семантика эквивалентности: через owl:sameAs факты типизации и свойства сдублированы на глобальные сущности Wikidata."
+    "2. Эквивалентность свойств даёт тройку pte:PyTorch wdt:P1324 pte:Repo_PyTorch_Q47509047 из pte:hasRepository.\n"
+    "3. По owl:sameAs выведена тройка wd:Q47509047 pte:hasRepository pte:Repo_PyTorch_Q47509047."
 )
 
 add_header("2. Валидация ограничений целостности SHACL (pyshacl)", level=2)
 doc.add_paragraph(
-    "Разработан шейп-файл shapes.shacl.ttl, проверяющий 4 различных вида ограничений:\n"
-    "• Кардинальность (Cardinality): sh:minCount 1, sh:maxCount 1 на название библиотеки и репозиторий.\n"
-    "• Класс значения (Value Class): sh:class pte:SoftwareLicense на отношение pte:hasLicense.\n"
-    "• Тип данных (Datatype): sh:datatype xsd:dateTime для pte:releaseDate и xsd:string для версий.\n"
-    "• Регулярное выражение (Pattern): sh:pattern \"^https://github\\\\.com/.*\" на URL репозиториев."
+    "Проверены кардинальность, класс объекта лицензии, типы данных, шаблон URL GitHub и нижняя граница счётчика версий. "
+    "До исправления PySHACL вернул пять нарушений sh:minCount. Четыре касались pte:hasLicense у GFPGAN, OpenCLIP, "
+    "pytorch-wavelets и PyTorch. Пятое касалось pte:hasSourceCodeRepository у PyTorch. "
+    "Сборщик воспроизводит следующие дополнения по официальным репозиториям."
 )
 
-doc.add_paragraph("Протокол валидации PySHACL до исправления:")
-shacl_log = """Validation Report
-Conforms: False
-Results (5):
-Constraint Violation in MinCountConstraintComponent (sh:minCount 1):
-  Target Class: pte:SoftwareLibrary
-  Focus Node: pte:Lib_gfpgan_Q120549808
-  Result Path: pte:hasLicense
-  Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+corrections = [
+    ("GFPGAN", "Apache License 2.0 для кода проекта с оговорками о сторонних компонентах.", (
+        ("LICENSE", "https://github.com/TencentARC/GFPGAN/blob/7552a7791caad982045a7bbe5634bbf1cd5c8679/LICENSE"),
+    )),
+    ("OpenCLIP", "Лицензия MIT.", (
+        ("LICENSE", "https://github.com/mlfoundations/open_clip/blob/4cc208d3a44a2fb6d6435006a46f520d2ccc29b1/LICENSE"),
+    )),
+    ("pytorch-wavelets", "Классификатор пакета Free To Use But Restricted. MIT применяется к новому коду и DWT, для DTCWT действуют отдельные условия.", (
+        ("setup.py", "https://github.com/fbcotter/pytorch_wavelets/blob/9a0c507f04f43c5397e384bb6be8340169b2fd9a/setup.py#L21-L28"),
+        ("LICENSE", "https://github.com/fbcotter/pytorch_wavelets/blob/9a0c507f04f43c5397e384bb6be8340169b2fd9a/LICENSE#L1-L7"),
+    )),
+    ("PyTorch", "Модифицированная лицензия BSD (BSD-3-Clause) и основной репозиторий pytorch/pytorch.", (
+        ("LICENSE", "https://github.com/pytorch/pytorch/blob/d38164a545b4a4e4e0cf73ce67173f70574890b6/LICENSE"),
+        ("репозиторий", "https://github.com/pytorch/pytorch"),
+    )),
+]
+for project, change, sources in corrections:
+    p = doc.add_paragraph()
+    p.add_run(f"{project} — ").bold = True
+    p.add_run(change)
+    for label, url in sources:
+        p.add_run(" ")
+        link = OxmlElement("w:hyperlink")
+        link.set(qn("r:id"), doc.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True))
+        run = OxmlElement("w:r")
+        properties = OxmlElement("w:rPr")
+        underline = OxmlElement("w:u")
+        underline.set(qn("w:val"), "single")
+        properties.append(underline)
+        run.append(properties)
+        label_text = OxmlElement("w:t")
+        label_text.text = label
+        run.append(label_text)
+        link.append(run)
+        p._p.append(link)
 
-Constraint Violation in MinCountConstraintComponent (sh:minCount 1):
-  Target Class: pte:SoftwareLibrary
-  Focus Node: pte:Lib_open_clip_torch_Q120550360
-  Result Path: pte:hasLicense
-  Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense."""
+doc.add_paragraph("Протокол повторной проверки PySHACL")
+shacl_log = Path("data/shacl_validation_report.txt").read_text(encoding="utf-8").split("\n\n", 1)[1]
 add_code_block(shacl_log)
 
 doc.add_paragraph(
-    "Анализ выявленных нарушений и принятые решения:\n"
-    "• Тип нарушения: Отсутствие лицензии (sh:minCount 1) у 5 библиотек (gfpgan, open-clip-torch, pytorch-wavelets и др.), "
-    "так как в исходной Wikidata свойство P275 не было проставлено сообществом.\n"
-    "• Принятое решение: Ограничение сохранено как обязательный инвариант предметной области (в открытом ПО лицензия обязательна). "
-    "Данные в knowledge_graph.ttl были исправлены и дополнены путем парсинга информации о лицензиях из GitHub-репозиториев "
-    "(проставлены лицензии Apache 2.0 и MIT).\n"
-    "• Повторная валидация после дополнения данных: Conforms: True (нарушения полностью устранены)."
+    "После исправления В2 учитывает 53 узла, включая центральный PyTorch. Распределение по лицензиям: MIT — 23, "
+    "Apache 2.0 — 21, модифицированная BSD — 6, двухпунктная BSD — 2, Free To Use But Restricted — 1. "
+    "В4 теперь также возвращает GFPGAN и его репозиторий. Результаты В1, В3, В5, В6, В11 и В12 совпали с эталонами. "
+    "Эталонные ответы В2 и В4 в разделе 2 обновлены по исправленному графу."
 )
 
 # Table of 52 Libraries in Appendix

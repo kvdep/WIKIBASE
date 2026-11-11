@@ -99,7 +99,7 @@ ont.add((PTE["hasSourceCodeRepository"], RDFS.subPropertyOf, PTE["hasRepository"
 # Datatype Properties
 dt_props = [
     ("libraryName", "SoftwareLibrary", XSD.string, "название библиотеки", "library name", "Строковое имя программной библиотеки.", False),
-    ("versionNumber", "SoftwareVersion", XSD.string, "номер версии", "version number", "Идентификатор версии в формате semver.", True),
+    ("versionIdentifier", "SoftwareVersion", XSD.string, "идентификатор версии", "version identifier", "Строковый идентификатор релиза.", True),
     ("releaseDate", "SoftwareVersion", XSD.dateTime, "дата релиза", "release date", "Точная дата публикации версии (квалификатор времени).", False),
     ("versionType", "SoftwareVersion", XSD.string, "тип версии", "version type", "Статус релиза: stable, alpha, beta.", False),
     ("repositoryURL", "Repository", XSD.anyURI, "URL репозитория", "repository URL", "Веб-адрес репозитория исходного кода.", True),
@@ -139,6 +139,16 @@ pytorch_uri = PTE["PyTorch"]
 kg.add((pytorch_uri, RDF.type, PTE["MachineLearningLibrary"]))
 kg.add((pytorch_uri, PTE["libraryName"], Literal("PyTorch", datatype=XSD.string)))
 kg.add((pytorch_uri, OWL.sameAs, URIRef("http://www.wikidata.org/entity/Q47509047")))
+pytorch_license = PTE["License_модифицированная_лицензия_BSD"]
+kg.add((pytorch_license, RDF.type, PTE["SoftwareLicense"]))
+kg.add((pytorch_license, PTE["licenseName"], Literal("модифицированная лицензия BSD", datatype=XSD.string)))
+kg.add((pytorch_uri, PTE["hasLicense"], pytorch_license))
+kg.add((pytorch_uri, PTE["hasPrimaryLicense"], pytorch_license))
+pytorch_repo = PTE["Repo_PyTorch_Q47509047"]
+kg.add((pytorch_repo, RDF.type, PTE["Repository"]))
+kg.add((pytorch_repo, PTE["repositoryURL"], Literal("https://github.com/pytorch/pytorch", datatype=XSD.anyURI)))
+kg.add((pytorch_uri, PTE["hasRepository"], pytorch_repo))
+kg.add((pytorch_uri, PTE["hasSourceCodeRepository"], pytorch_repo))
 
 # Subclass classifier mapping
 cv_keywords = ["vision", "image", "face", "kornia", "timm", "nerf", "clip", "effdet", "gfpgan", "facexlib", "clean-fid", "lpips", "tomesd"]
@@ -172,6 +182,13 @@ for lic_name, (short_name, lic_wd) in licenses_map.items():
     kg.add((l_uri, PTE["licenseName"], Literal(lic_name, datatype=XSD.string)))
     kg.add((l_uri, OWL.sameAs, URIRef(lic_wd)))
 
+# License labels verified in the projects' repositories for missing Wikidata values.
+repository_licenses = {
+    "Q120549808": ("Apache License 2.0",),
+    "Q120550360": ("лицензия MIT",),
+    "Q120550396": ("Free To Use But Restricted",),
+}
+
 # Add 52 libraries
 for qid, lib in libraries.items():
     safe_name = "".join(c if c.isalnum() else "_" for c in lib['label'])
@@ -203,8 +220,9 @@ for qid, lib in libraries.items():
         kg.add((lib_uri, PTE["hasSourceCodeRepository"], repo_uri))
         
     # License
-    if lib['licenses']:
-        first_lic = lib['licenses'][0]
+    licenses = lib['licenses'] or repository_licenses.get(qid, ())
+    if licenses:
+        first_lic = licenses[0]
         lic_key = None
         for k in licenses_map:
             if k.lower() in first_lic.lower() or first_lic.lower() in k.lower():

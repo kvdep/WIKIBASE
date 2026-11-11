@@ -117,11 +117,11 @@ pte:versionCount a owl:DatatypeProperty,
     rdfs:domain pte:SoftwareLibrary ;
     rdfs:range xsd:integer .
 
-pte:versionNumber a owl:DatatypeProperty,
+pte:versionIdentifier a owl:DatatypeProperty,
         owl:FunctionalProperty ;
-    rdfs:label "version number"@en,
-        "номер версии"@ru ;
-    rdfs:comment "Идентификатор версии в формате semver."@ru ;
+    rdfs:label "version identifier"@en,
+        "идентификатор версии"@ru ;
+    rdfs:comment "Строковый идентификатор релиза."@ru ;
     rdfs:domain pte:SoftwareVersion ;
     rdfs:range xsd:string .
 

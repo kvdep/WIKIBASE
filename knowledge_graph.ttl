@@ -858,6 +858,8 @@ pte:Lib_fschat_Q120733123 a pte:NaturalLanguageProcessingLibrary ;
 pte:Lib_gfpgan_Q120549808 a pte:ComputerVisionLibrary ;
     rdfs:label "gfpgan"@en ;
     pte:dependsOnSoftware pte:PyTorch ;
+    pte:hasLicense pte:License_Apache_License_2_0 ;
+    pte:hasPrimaryLicense pte:License_Apache_License_2_0 ;
     pte:hasRepository pte:Repo_gfpgan_Q120549808 ;
     pte:hasSourceCodeRepository pte:Repo_gfpgan_Q120549808 ;
     pte:hasVersion pte:Ver_gfpgan_Q120549808_0_1_0_1,
@@ -1099,6 +1101,8 @@ pte:Lib_nerfacc_Q120550358 a pte:ComputerVisionLibrary ;
 pte:Lib_open_clip_torch_Q120550360 a pte:ComputerVisionLibrary ;
     rdfs:label "open-clip-torch"@en ;
     pte:dependsOnSoftware pte:PyTorch ;
+    pte:hasLicense pte:License_лицензия_MIT ;
+    pte:hasPrimaryLicense pte:License_лицензия_MIT ;
     pte:hasRepository pte:Repo_open_clip_torch_Q120550360 ;
     pte:hasSourceCodeRepository pte:Repo_open_clip_torch_Q120550360 ;
     pte:hasVersion pte:Ver_open_clip_torch_Q120550360_0_2_1_32,
@@ -1848,6 +1852,8 @@ pte:Lib_pytorch_transformers_Q107385836 a pte:NaturalLanguageProcessingLibrary ;
 pte:Lib_pytorch_wavelets_Q120550396 a pte:MachineLearningLibrary ;
     rdfs:label "pytorch-wavelets"@en ;
     pte:dependsOnSoftware pte:PyTorch ;
+    pte:hasLicense pte:License_Free_To_Use_But_Restricted ;
+    pte:hasPrimaryLicense pte:License_Free_To_Use_But_Restricted ;
     pte:hasRepository pte:Repo_pytorch_wavelets_Q120550396 ;
     pte:hasSourceCodeRepository pte:Repo_pytorch_wavelets_Q120550396 ;
     pte:hasVersion pte:Ver_pytorch_wavelets_Q120550396_1_1_0_0 ;
@@ -10952,11 +10958,17 @@ pte:Ver_triton_Q121435758_3_9_0_21 a pte:SoftwareVersion ;
     pte:versionIdentifier "3.9.0"^^xsd:string ;
     pte:versionType "стабильная версия"^^xsd:string .
 
+pte:License_Free_To_Use_But_Restricted a pte:SoftwareLicense ;
+    pte:licenseName "Free To Use But Restricted"^^xsd:string .
+
 pte:Repo_PyKEEN_Q96631404 a pte:Repository ;
     pte:repositoryURL "https://github.com/pykeen/pykeen"^^xsd:anyURI .
 
 pte:Repo_PyTorch_Lightning_Q85847011 a pte:Repository ;
     pte:repositoryURL "https://github.com/Lightning-AI/lightning"^^xsd:anyURI .
+
+pte:Repo_PyTorch_Q47509047 a pte:Repository ;
+    pte:repositoryURL "https://github.com/pytorch/pytorch"^^xsd:anyURI .
 
 pte:Repo_Pyserini_Q136092892 a pte:Repository ;
     pte:repositoryURL "https://github.com/castorini/pyserini"^^xsd:anyURI .
@@ -11121,6 +11133,10 @@ pte:License_лицензия_MIT a pte:SoftwareLicense ;
     pte:licenseName "лицензия MIT"^^xsd:string .
 
 pte:PyTorch a pte:MachineLearningLibrary ;
+    pte:hasLicense pte:License_модифицированная_лицензия_BSD ;
+    pte:hasPrimaryLicense pte:License_модифицированная_лицензия_BSD ;
+    pte:hasRepository pte:Repo_PyTorch_Q47509047 ;
+    pte:hasSourceCodeRepository pte:Repo_PyTorch_Q47509047 ;
     pte:libraryName "PyTorch"^^xsd:string ;
     owl:sameAs wd:Q47509047 .
 

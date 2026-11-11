@@ -126,7 +126,8 @@ infer_graph = Graph()
 infer_graph.parse("ontology.ttl", format="turtle")
 infer_graph.parse("knowledge_graph.ttl", format="turtle")
 
-initial_triples = len(infer_graph)
+asserted_triples = set(infer_graph)
+initial_triples = len(asserted_triples)
 print(f"Initial Triples (Ontology + Graph): {initial_triples}")
 
 # Expand with OWL 2 RL Semantics
@@ -142,7 +143,7 @@ print("\nSample Inferred Triples:")
 PTE = Namespace("http://example.org/pytorch-ecosystem#")
 sample_count = 0
 inferred_sample_text = []
-for s, p, o in infer_graph:
+for s, p, o in sorted(set(infer_graph) - asserted_triples):
     # Look for inferred superclass relationships
     if p == RDF.type and o in [PTE.SoftwareLibrary, PTE.MachineLearningLibrary]:
         inferred_sample_text.append(f"  {s.split('#')[-1]} rdf:type {o.split('#')[-1]}")
@@ -156,7 +157,7 @@ with open("data/owlrl_reasoning_summary.txt", "w", encoding="utf-8") as f:
     f.write(f"Initial Triples: {initial_triples}\n")
     f.write(f"Total Triples after reasoning: {inferred_triples}\n")
     f.write(f"Added Triples: {added_triples}\n\n")
-    f.write("Sample Inferred Triples (Superclass & Subproperty inheritance):\n")
+    f.write("Sample Inferred Triples (Superclass inference):\n")
     f.write("\n".join(inferred_sample_text))
 
 print("\nSaved SHACL report and OWLRL summary to data/")

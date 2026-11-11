@@ -1,15 +1,15 @@
-Initial Triples: 9378
-Total Triples after reasoning: 22201
-Added Triples: 12823
+Initial Triples: 9457
+Total Triples after reasoning: 22381
+Added Triples: 12924
 
-Sample Inferred Triples (Superclass & Subproperty inheritance):
-  Lib_catalyst_Q107382139 rdf:type MachineLearningLibrary
-  Lib_catalyst_Q107382139 rdf:type SoftwareLibrary
-  http://www.wikidata.org/entity/Q116908792 rdf:type MachineLearningLibrary
-  Lib_clean_fid_Q120549792 rdf:type MachineLearningLibrary
-  http://www.wikidata.org/entity/Q116908792 rdf:type SoftwareLibrary
-  Lib_captum_Q107382311 rdf:type MachineLearningLibrary
-  http://www.wikidata.org/entity/Q120550360 rdf:type SoftwareLibrary
-  Lib_captum_Q107382311 rdf:type SoftwareLibrary
-  http://www.wikidata.org/entity/Q120550306 rdf:type MachineLearningLibrary
-  Lib_bert_score_Q107382224 rdf:type MachineLearningLibrary
+Sample Inferred Triples (Superclass inference):
+  Lib_PyKEEN_Q96631404 rdf:type MachineLearningLibrary
+  Lib_PyKEEN_Q96631404 rdf:type SoftwareLibrary
+  Lib_PyTorch_Lightning_Q85847011 rdf:type MachineLearningLibrary
+  Lib_PyTorch_Lightning_Q85847011 rdf:type SoftwareLibrary
+  Lib_Pyserini_Q136092892 rdf:type SoftwareLibrary
+  Lib_STonKGs_Q116908797 rdf:type MachineLearningLibrary
+  Lib_STonKGs_Q116908797 rdf:type SoftwareLibrary
+  Lib_Stanza_Q120550372 rdf:type MachineLearningLibrary
+  Lib_Stanza_Q120550372 rdf:type SoftwareLibrary
+  Lib_accelerate_Q116908792 rdf:type MachineLearningLibrary
