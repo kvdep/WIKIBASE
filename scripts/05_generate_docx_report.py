@@ -1,3 +1,4 @@
+from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
+from rdflib import Graph, Namespace, RDF
 import json
 import os
 
@@ -323,37 +325,73 @@ doc.add_paragraph(
     "Данные выгружены из Wikidata и трансформированы в термины собственной онтологии. "
     "Граф сохранен на диск в формате Turtle (файл knowledge_graph.ttl). "
     "Для обеспечения интероперабельности у каждой библиотеки проставлено отношение owl:sameAs "
-    "на глобальный идентификатор Wikidata вида http://www.wikidata.org/entity/Q... ."
+    "на глобальный идентификатор Wikidata вида http://www.wikidata.org/entity/Q... . "
+    "Статистика рассчитана по сохранённым в файле триплетам до логического вывода. "
+    "Число экземпляров класса определяется по явным утверждениям rdf:type, "
+    "число использований предиката — по числу триплетов с этим предикатом."
 )
 
-stat_kg_tbl = doc.add_table(rows=6, cols=2)
-stat_kg_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+knowledge_graph = Graph().parse("knowledge_graph.ttl", format="turtle")
+pte = Namespace("http://example.org/pytorch-ecosystem#")
+subjects = set(knowledge_graph.subjects())
+libraries = set(knowledge_graph.subjects(pte.dependsOnSoftware, pte.PyTorch))
+versions = set(knowledge_graph.subjects(RDF.type, pte.SoftwareVersion))
+dated_versions = versions & set(knowledge_graph.subjects(pte.releaseDate))
+repositories = set(knowledge_graph.subjects(RDF.type, pte.Repository))
+repository_urls = {
+    url for repository in repositories for url in knowledge_graph.objects(repository, pte.repositoryURL)
+}
+
+
+def format_kg_count(count):
+    return f"{count:,}".replace(",", " ")
+
+
 kg_stats = [
     ("Метрика графа знаний", "Значение"),
-    ("Общее число триплетов (троек)", "9 223"),
-    ("Число уникальных субъектов", "1 819"),
-    ("Число библиотек экосистемы PyTorch", "52 (+ 1 центральный узел PyTorch)"),
-    ("Число зарегистрированных версий (SoftwareVersion)", "1 706 релизов с датами"),
-    ("Число репозиториев кода (Repository)", "52 валидированных GitHub-репозитория")
+    ("Общее число триплетов (троек)", format_kg_count(len(knowledge_graph))),
+    ("Число уникальных субъектов", format_kg_count(len(subjects))),
+    ("Число библиотек, зависящих от PyTorch", format_kg_count(len(libraries))),
+    ("Центральный узел PyTorch", str(int(pte.PyTorch in subjects))),
+    ("Число зарегистрированных версий (SoftwareVersion)", format_kg_count(len(versions))),
+    ("Из них с датой релиза", format_kg_count(len(dated_versions))),
+    ("Число узлов репозиториев (Repository)", format_kg_count(len(repositories))),
+    ("Число уникальных URL репозиториев", format_kg_count(len(repository_urls))),
 ]
-for r_i, row in enumerate(kg_stats):
-    for c_i, val in enumerate(row):
-        c = stat_kg_tbl.cell(r_i, c_i)
-        set_cell_margins(c, top=60, bottom=60, left=100, right=100)
-        p = c.paragraphs[0]
-        p.paragraph_format.space_after = Pt(0)
-        run = p.add_run(val)
+class_counts = Counter(knowledge_graph.objects(predicate=RDF.type))
+predicate_counts = Counter(knowledge_graph.predicates())
+kg_tables = [kg_stats]
+for header, counts in (
+    (("Класс", "Число экземпляров"), class_counts),
+    (("Предикат", "Число триплетов"), predicate_counts),
+):
+    rows = [
+        (knowledge_graph.namespace_manager.qname(term), format_kg_count(count))
+        for term, count in sorted(counts.items(), key=lambda item: (-item[1], str(item[0])))
+    ]
+    kg_tables.append([header, *rows])
+
+for rows in kg_tables:
+    stat_kg_tbl = doc.add_table(rows=len(rows), cols=2)
+    stat_kg_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for r_i, (table_row, values) in enumerate(zip(stat_kg_tbl.rows, rows)):
+        row_properties = table_row._tr.get_or_add_trPr()
+        row_properties.append(OxmlElement("w:cantSplit"))
         if r_i == 0:
-            set_cell_background(c, "1F4E78")
-            run.bold = True
-            run.font.color.rgb = RGBColor(255, 255, 255)
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        else:
-            if c_i == 1:
+            row_properties.append(OxmlElement("w:tblHeader"))
+        for c_i, (cell, value) in enumerate(zip(table_row.cells, values)):
+            set_cell_margins(cell, top=60, bottom=60, left=100, right=100)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0)
+            run = p.add_run(value)
+            if r_i == 0:
+                set_cell_background(cell, "1F4E78")
+                run.font.color.rgb = RGBColor(255, 255, 255)
+                p.paragraph_format.keep_with_next = True
+            if r_i == 0 or c_i == 1:
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 run.bold = True
-
-doc.add_paragraph()
+    doc.add_paragraph()
 
 # ==========================================
 # ЗАДАНИЕ 5
