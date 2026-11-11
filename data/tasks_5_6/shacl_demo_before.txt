@@ -1,0 +1,37 @@
+Validation Report
+Conforms: False
+Results (5):
+Constraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:class pte:SoftwareLicense ; sh:message Literal("Лицензия библиотеки должна быть объектом класса SoftwareLicense.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:hasLicense ]
+	Focus Node: pte:Lib_PyKEEN_Q96631404
+	Value Node: pte:Repo_PyKEEN_Q96631404
+	Result Path: pte:hasLicense
+	Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+Constraint Violation in DatatypeConstraintComponent (http://www.w3.org/ns/shacl#DatatypeConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:string ; sh:message Literal("Идентификатор версии должен быть строкой.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:versionIdentifier ]
+	Focus Node: pte:Ver_PyKEEN_Q96631404_0_0_26_18
+	Value Node: Literal("123", datatype=xsd:integer)
+	Result Path: pte:versionIdentifier
+	Message: Идентификатор версии должен быть строкой.
+Constraint Violation in MaxCountConstraintComponent (http://www.w3.org/ns/shacl#MaxCountConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:string ; sh:maxCount Literal("1", datatype=xsd:integer) ; sh:message Literal("Библиотека должна иметь ровно одно строковое название (libraryName).", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:libraryName ]
+	Focus Node: pte:Lib_PyKEEN_Q96631404
+	Result Path: pte:libraryName
+	Message: Библиотека должна иметь ровно одно строковое название (libraryName).
+Constraint Violation in MinInclusiveConstraintComponent (http://www.w3.org/ns/shacl#MinInclusiveConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:integer ; sh:message Literal("Число версий должно быть неотрицательным целым числом.", lang=ru) ; sh:minInclusive Literal("0", datatype=xsd:integer) ; sh:path pte:versionCount ]
+	Focus Node: pte:Lib_PyKEEN_Q96631404
+	Value Node: Literal("-1", datatype=xsd:integer)
+	Result Path: pte:versionCount
+	Message: Число версий должно быть неотрицательным целым числом.
+Constraint Violation in PatternConstraintComponent (http://www.w3.org/ns/shacl#PatternConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:anyURI ; sh:maxCount Literal("1", datatype=xsd:integer) ; sh:message Literal("URL репозитория должен указывать на валидный адрес GitHub репозитория.", lang=ru) ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:path pte:repositoryURL ; sh:pattern Literal("^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$") ]
+	Focus Node: pte:Repo_PyKEEN_Q96631404
+	Value Node: Literal("http://github.com/pykeen/pykeen", datatype=xsd:anyURI)
+	Result Path: pte:repositoryURL
+	Message: URL репозитория должен указывать на валидный адрес GitHub репозитория.

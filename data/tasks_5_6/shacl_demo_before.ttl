@@ -1,0 +1,64 @@
+@prefix pte: <http://example.org/pytorch-ecosystem#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+[] a sh:ValidationReport ;
+    sh:conforms false ;
+    sh:result [ a sh:ValidationResult ;
+            sh:focusNode pte:Lib_PyKEEN_Q96631404 ;
+            sh:resultMessage "Число версий должно быть неотрицательным целым числом."@ru ;
+            sh:resultPath pte:versionCount ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinInclusiveConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:integer ;
+                    sh:message "Число версий должно быть неотрицательным целым числом."@ru ;
+                    sh:minInclusive 0 ;
+                    sh:path pte:versionCount ] ;
+            sh:value -1 ],
+        [ a sh:ValidationResult ;
+            sh:focusNode pte:Repo_PyKEEN_Q96631404 ;
+            sh:resultMessage "URL репозитория должен указывать на валидный адрес GitHub репозитория."@ru ;
+            sh:resultPath pte:repositoryURL ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:PatternConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:anyURI ;
+                    sh:maxCount 1 ;
+                    sh:message "URL репозитория должен указывать на валидный адрес GitHub репозитория."@ru ;
+                    sh:minCount 1 ;
+                    sh:path pte:repositoryURL ;
+                    sh:pattern "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$" ] ;
+            sh:value "http://github.com/pykeen/pykeen"^^xsd:anyURI ],
+        [ a sh:ValidationResult ;
+            sh:focusNode pte:Lib_PyKEEN_Q96631404 ;
+            sh:resultMessage "Лицензия библиотеки должна быть объектом класса SoftwareLicense."@ru ;
+            sh:resultPath pte:hasLicense ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape [ sh:class pte:SoftwareLicense ;
+                    sh:message "Лицензия библиотеки должна быть объектом класса SoftwareLicense."@ru ;
+                    sh:minCount 1 ;
+                    sh:path pte:hasLicense ] ;
+            sh:value pte:Repo_PyKEEN_Q96631404 ],
+        [ a sh:ValidationResult ;
+            sh:focusNode pte:Lib_PyKEEN_Q96631404 ;
+            sh:resultMessage "Библиотека должна иметь ровно одно строковое название (libraryName)."@ru ;
+            sh:resultPath pte:libraryName ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MaxCountConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:string ;
+                    sh:maxCount 1 ;
+                    sh:message "Библиотека должна иметь ровно одно строковое название (libraryName)."@ru ;
+                    sh:minCount 1 ;
+                    sh:path pte:libraryName ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode pte:Ver_PyKEEN_Q96631404_0_0_26_18 ;
+            sh:resultMessage "Идентификатор версии должен быть строкой."@ru ;
+            sh:resultPath pte:versionIdentifier ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:DatatypeConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:string ;
+                    sh:message "Идентификатор версии должен быть строкой."@ru ;
+                    sh:minCount 1 ;
+                    sh:path pte:versionIdentifier ] ;
+            sh:value 123 ] .
+

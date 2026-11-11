@@ -1,0 +1,49 @@
+@prefix pte: <http://example.org/pytorch-ecosystem#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+pte:LibraryShape a sh:NodeShape ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:message "Библиотека должна иметь ровно одно строковое название (libraryName)."@ru ;
+            sh:minCount 1 ;
+            sh:path pte:libraryName ],
+        [ sh:class pte:SoftwareLicense ;
+            sh:message "Лицензия библиотеки должна быть объектом класса SoftwareLicense."@ru ;
+            sh:minCount 1 ;
+            sh:path pte:hasLicense ],
+        [ sh:maxCount 1 ;
+            sh:message "У библиотеки должен быть указан ровно один основной репозиторий исходного кода."@ru ;
+            sh:minCount 1 ;
+            sh:path pte:hasSourceCodeRepository ],
+        [ sh:datatype xsd:integer ;
+            sh:message "Число версий должно быть неотрицательным целым числом."@ru ;
+            sh:minInclusive 0 ;
+            sh:path pte:versionCount ] ;
+    sh:targetClass pte:AudioProcessingLibrary,
+        pte:ComputerVisionLibrary,
+        pte:MachineLearningLibrary,
+        pte:NaturalLanguageProcessingLibrary,
+        pte:OptimizationAndTrainingLibrary,
+        pte:ProbabilisticAndGraphLibrary,
+        pte:SoftwareLibrary .
+
+pte:RepositoryShape a sh:NodeShape ;
+    sh:property [ sh:datatype xsd:anyURI ;
+            sh:maxCount 1 ;
+            sh:message "URL репозитория должен указывать на валидный адрес GitHub репозитория."@ru ;
+            sh:minCount 1 ;
+            sh:path pte:repositoryURL ;
+            sh:pattern "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$" ] ;
+    sh:targetClass pte:Repository .
+
+pte:VersionShape a sh:NodeShape ;
+    sh:property [ sh:datatype xsd:dateTime ;
+            sh:message "Дата публикации версии должна иметь тип xsd:dateTime."@ru ;
+            sh:path pte:releaseDate ],
+        [ sh:datatype xsd:string ;
+            sh:message "Идентификатор версии должен быть строкой."@ru ;
+            sh:minCount 1 ;
+            sh:path pte:versionIdentifier ] ;
+    sh:targetClass pte:SoftwareVersion .
+

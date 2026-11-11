@@ -1,0 +1,27 @@
+[
+  {
+    "Механизм": "Иерархия классов",
+    "Добавленная тройка": "pte:Lib_PyKEEN_Q96631404 rdf:type pte:MachineLearningLibrary .",
+    "Предпосылки": "[исходная] pte:Lib_PyKEEN_Q96631404 rdf:type pte:ProbabilisticAndGraphLibrary .\n[исходная] pte:ProbabilisticAndGraphLibrary rdfs:subClassOf pte:MachineLearningLibrary ."
+  },
+  {
+    "Механизм": "Транзитивная иерархия",
+    "Добавленная тройка": "pte:Lib_PyKEEN_Q96631404 rdf:type pte:SoftwareLibrary .",
+    "Предпосылки": "[выведенная] pte:Lib_PyKEEN_Q96631404 rdf:type pte:MachineLearningLibrary .\n[исходная] pte:MachineLearningLibrary rdfs:subClassOf pte:SoftwareLibrary ."
+  },
+  {
+    "Механизм": "Эквивалентность классов",
+    "Добавленная тройка": "pte:Lib_PyKEEN_Q96631404 rdf:type wd:Q188860 .",
+    "Предпосылки": "[выведенная] pte:Lib_PyKEEN_Q96631404 rdf:type pte:SoftwareLibrary .\n[исходная] pte:SoftwareLibrary owl:equivalentClass wd:Q188860 ."
+  },
+  {
+    "Механизм": "Эквивалентность свойств",
+    "Добавленная тройка": "pte:Lib_PyKEEN_Q96631404 <http://www.wikidata.org/prop/direct/P1547> pte:PyTorch .",
+    "Предпосылки": "[исходная] pte:Lib_PyKEEN_Q96631404 pte:dependsOnSoftware pte:PyTorch .\n[исходная] pte:dependsOnSoftware owl:equivalentProperty <http://www.wikidata.org/prop/direct/P1547> ."
+  },
+  {
+    "Механизм": "Тождество owl:sameAs",
+    "Добавленная тройка": "wd:Q96631404 pte:libraryName \"PyKEEN\"^^xsd:string .",
+    "Предпосылки": "[исходная] pte:Lib_PyKEEN_Q96631404 owl:sameAs wd:Q96631404 .\n[исходная] pte:Lib_PyKEEN_Q96631404 pte:libraryName \"PyKEEN\"^^xsd:string ."
+  }
+]
